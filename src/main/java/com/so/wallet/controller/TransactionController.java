@@ -2,6 +2,9 @@ package com.so.wallet.controller;
 
 import com.so.wallet.entities.Transaction;
 import com.so.wallet.service.TransactionService;
+import com.so.wallet.util.PdfExporter;
+import io.jsonwebtoken.io.IOException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,4 +40,16 @@ public class TransactionController {
         transactionService.deleteTransaction(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/export/pdf")
+    public void exportTransactionsToPDF(HttpServletResponse response) throws IOException, java.io.IOException {
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=transactions.pdf");
+
+        List<String> lignes = transactionService.getAllTransactions().stream()
+                .map(t -> "Date: " + t.getDate() + ", Montant: " + t.getMontant() + ", Catégorie: " + t.getCategorie().getNom())
+                .toList();
+
+        PdfExporter.exportTransactions(response, lignes);
+    }
+
 }

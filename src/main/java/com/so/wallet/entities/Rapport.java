@@ -21,4 +21,14 @@ public class Rapport {
     @ManyToOne
     private Utilisateur utilisateur;
 
+    public String getNom() {
+        String nomUtilisateur = (utilisateur != null && utilisateur.getName() != null)
+                ? utilisateur.getName()
+                : "Inconnu";
+        return "Rapport de " + nomUtilisateur + " - " + dateGeneration;
+    }
+
+    public String getDescription() {
+        return "Revenus: " + totalRevenu + ", Dépenses: " + totalDepense + ", Solde: " + solde;
+    }
 }
