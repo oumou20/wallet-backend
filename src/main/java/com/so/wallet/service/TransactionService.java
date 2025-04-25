@@ -1,11 +1,14 @@
 package com.so.wallet.service;
 
+import com.so.wallet.entities.Notification;
 import com.so.wallet.entities.Transaction;
+import com.so.wallet.repository.NotificationRepository;
 import com.so.wallet.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +18,13 @@ public class TransactionService {
 
     @Autowired
     private TransactionRepository transactionRepository;
+    @Autowired
+    private NotificationRepository notificationRepository;
+    private NotificationService notificationService;
+
+    @Autowired
+    private BudgetService budgetService;
+
 
     public List<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
@@ -25,8 +35,16 @@ public class TransactionService {
     }
 
     public Transaction saveTransaction(Transaction transaction) {
-        return transactionRepository.save(transaction);
+        // Enregistrer la transaction
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        // Vérifier si une alerte doit être envoyée pour cette transaction
+        checkAndCreateAlert(savedTransaction);
+
+        return savedTransaction;
     }
+
+
 
     public void deleteTransaction(Long id) {
         transactionRepository.deleteById(id);
@@ -69,4 +87,33 @@ public class TransactionService {
         // Exemples d'agrégations pour obtenir les dépenses par catégorie
         return Collections.singletonList(transactionRepository.findCategoryWiseExpenseDistribution()); // Création d'une méthode dans le repo pour l'agrégation
     }
+
+    // Méthode pour créer une notification si une transaction dépasse le budget
+
+    public void checkAndCreateAlert(Transaction transaction) {
+        if (transaction.getBudget() != null) {
+            List<Transaction> transactions = transactionRepository.findByBudgetId(transaction.getBudget().getId());
+
+            double totalDepense = transactions.stream()
+                    .mapToDouble(Transaction::getMontant)
+                    .sum();
+
+            double montantBudget = transaction.getBudget().getMontant();
+
+            if (totalDepense > montantBudget) {
+                String message = "Alerte : Budget dépassé ! Dépenses actuelles : " + totalDepense + " / Budget : " + montantBudget;
+
+                // Vérifier si une alerte similaire a déjà été envoyée aujourd’hui
+                if (!notificationService.hasRecentBudgetAlert(transaction.getUtilisateur().getId(), message)) {
+                    Notification notification = new Notification();
+                    notification.setMessage(message);
+                    notification.setDateNotification(java.time.LocalDateTime.now());
+                    notification.setUtilisateur(transaction.getUtilisateur());
+                    notificationService.saveNotification(notification);
+                }
+            }
+        }
+    }
+
 }
+
