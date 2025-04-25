@@ -51,5 +51,23 @@ public class TransactionController {
 
         PdfExporter.exportTransactions(response, lignes);
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<Transaction> updateTransaction(@PathVariable Long id, @RequestBody Transaction updatedTransaction) {
+        Optional<Transaction> existingTransaction = transactionService.getTransactionById(id);
+
+        if (existingTransaction.isPresent()) {
+            Transaction transaction = existingTransaction.get();
+            transaction.setMontant(updatedTransaction.getMontant());
+            transaction.setDate(updatedTransaction.getDate());
+            transaction.setCategorie(updatedTransaction.getCategorie());
+            transaction.setBudget(updatedTransaction.getBudget());
+            transaction.setUtilisateur(updatedTransaction.getUtilisateur());
+
+            Transaction saved = transactionService.saveTransaction(transaction);
+            return ResponseEntity.ok(saved);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 }
