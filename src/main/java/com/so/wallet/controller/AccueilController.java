@@ -6,6 +6,6 @@ public class AccueilController {
 
     @GetMapping("/")
     public String welcome() {
-        return "Bienvenue sur votre application Spring Boot déployée sur Fly.io !";
+        return "Bienvenue sur notre application Spring Boot déployée sur Fly.io !";
     }
 }
