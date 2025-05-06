@@ -64,4 +64,10 @@ public class UtilisateurController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+    @GetMapping("/profil")
+    public ResponseEntity<Utilisateur> getProfilUtilisateur() {
+        Utilisateur utilisateur = utilisateurService.getUtilisateurActuel();
+        return ResponseEntity.ok(utilisateur);
+    }
+
 }

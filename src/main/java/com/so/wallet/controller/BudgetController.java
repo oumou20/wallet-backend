@@ -37,4 +37,15 @@ public class BudgetController {
         budgetService.deleteBudget(id);
         return ResponseEntity.noContent().build();
     }
+    @PutMapping("/{id}/ajuster")
+    public ResponseEntity<Budget> ajusterBudget(@PathVariable Long id, @RequestParam Double montant) {
+        Budget budgetAjuste = budgetService.ajusterBudget(id, montant);
+        return ResponseEntity.ok(budgetAjuste);
+    }
+    @GetMapping("/{id}/solde")
+    public ResponseEntity<Double> getSolde(@PathVariable Long id) {
+        double solde = budgetService.calculerSolde(id);
+        return ResponseEntity.ok(solde);
+    }
+
 }

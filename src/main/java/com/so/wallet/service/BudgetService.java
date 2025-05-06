@@ -2,6 +2,7 @@ package com.so.wallet.service;
 
 import com.so.wallet.entities.Budget;
 import com.so.wallet.entities.Transaction;
+import com.so.wallet.entities.TypeTransaction;
 import com.so.wallet.repository.BudgetRepository;
 import com.so.wallet.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,8 @@ public class BudgetService {
 
     @Autowired
     private BudgetRepository budgetRepository;
-    TransactionRepository transactionRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     public List<Budget> getAllBudgets() {
         return budgetRepository.findAll();
@@ -38,13 +40,19 @@ public class BudgetService {
 
         List<Transaction> transactions = transactionRepository.findByBudgetId(budgetId);
 
-        double solde = 0.0;
+        double totalDepenses = transactions.stream()
+                .filter(t -> t.getType() == TypeTransaction.DEPENSE)
+                .mapToDouble(Transaction::getMontant)
+                .sum();
 
-        for (Transaction t : transactions) {
-            solde += t.getMontant();
-        }
+        return budget.getMontant() - totalDepenses;
+    }
 
-        return solde;
+    public Budget ajusterBudget(Long id, Double nouveauMontant) {
+        Budget budget = budgetRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Budget introuvable"));
+        budget.setMontant(nouveauMontant);
+        return budgetRepository.save(budget);
     }
 
 }
