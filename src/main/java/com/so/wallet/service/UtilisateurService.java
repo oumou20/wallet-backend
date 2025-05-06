@@ -11,6 +11,7 @@ import com.so.wallet.repository.RapportRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,5 +49,11 @@ private  UtilisateurRepository utilisateurRepository;
     public List<Rapport> getRapports(Long utilisateurId) {
         return rapportRepository.findByUtilisateurId(utilisateurId);
     }
+    public Utilisateur getUtilisateurActuel() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+    }
+
 
 }
