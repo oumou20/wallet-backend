@@ -1,9 +1,11 @@
 package com.so.wallet.controller;
 
 import com.so.wallet.entities.Budget;
+import com.so.wallet.entities.Utilisateur;
 import com.so.wallet.service.BudgetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,10 +18,17 @@ public class BudgetController {
     @Autowired
     private BudgetService budgetService;
 
+    // Endpoint pour récupérer les budgets de l'utilisateur connecté
     @GetMapping
+    public List<Budget> getByBudgetsUtilisateur(@AuthenticationPrincipal Utilisateur utilisateur) {
+        // Appeler le service pour récupérer les budgets de l'utilisateur
+        return budgetService.getByBudgetsUtilisateur(utilisateur);
+    }
+
+  /*  @GetMapping
     public List<Budget> getAllBudgets() {
         return budgetService.getAllBudgets();
-    }
+    }*/
 
     @GetMapping("/{id}")
     public ResponseEntity<Budget> getBudgetById(@PathVariable Long id) {

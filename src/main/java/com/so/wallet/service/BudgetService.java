@@ -3,6 +3,7 @@ package com.so.wallet.service;
 import com.so.wallet.entities.Budget;
 import com.so.wallet.entities.Transaction;
 import com.so.wallet.entities.TypeTransaction;
+import com.so.wallet.entities.Utilisateur;
 import com.so.wallet.repository.BudgetRepository;
 import com.so.wallet.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,16 @@ public class BudgetService {
     private BudgetRepository budgetRepository;
     @Autowired
     private TransactionRepository transactionRepository;
+    // Méthode pour récupérer tous les budgets d'un utilisateur
+    public List<Budget> getByBudgetsUtilisateur(Utilisateur utilisateur) {
+        // Vérifier si l'utilisateur est valide
+        if (utilisateur == null) {
+            throw new IllegalArgumentException("Utilisateur non trouvé");
+        }
+
+        // Utiliser le repository pour récupérer les budgets de l'utilisateur
+        return budgetRepository.findByUtilisateur(utilisateur);
+    }
 
     public List<Budget> getAllBudgets() {
         return budgetRepository.findAll();
