@@ -2,6 +2,7 @@ package com.so.wallet.service;
 
 import com.so.wallet.entities.Notification;
 import com.so.wallet.entities.Transaction;
+import com.so.wallet.entities.Utilisateur;
 import com.so.wallet.repository.NotificationRepository;
 import com.so.wallet.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +27,15 @@ public class TransactionService {
     private BudgetService budgetService;
 
 
-    public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
+    // Méthode pour récupérer toutes les transactions de l'utilisateur
+    public List<Transaction> getTransactionsByUtilisateur(Utilisateur utilisateur) {
+        // Vérifier si l'utilisateur est valide
+        if (utilisateur == null) {
+            throw new IllegalArgumentException("Utilisateur non trouvé");
+        }
+
+        // Utiliser le repository pour récupérer les transactions
+        return transactionRepository.findByUtilisateur(utilisateur);
     }
 
     public Optional<Transaction> getTransactionById(Long id) {
