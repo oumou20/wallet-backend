@@ -33,9 +33,12 @@ public class TransactionController {
     }
 
     @PostMapping
-    public Transaction createTransaction(@RequestBody Transaction transaction) {
+    public Transaction createTransaction(@RequestBody Transaction transaction,
+                                         @AuthenticationPrincipal Utilisateur utilisateur) {
+        transaction.setUtilisateur(utilisateur);
         return transactionService.saveTransaction(transaction);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
