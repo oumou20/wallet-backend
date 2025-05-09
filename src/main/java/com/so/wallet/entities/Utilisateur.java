@@ -17,7 +17,6 @@ public class Utilisateur implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String role;
     private String name;
     private String prenom;
     private String email;
