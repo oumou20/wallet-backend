@@ -30,9 +30,9 @@ public class BudgetService {
         return budgetRepository.findByUtilisateur(utilisateur);
     }
 
-    public List<Budget> getAllBudgets() {
+   /*public List<Budget> getAllBudgets() {
         return budgetRepository.findAll();
-    }
+    }*/ 
 
     public Optional<Budget> getBudgetById(Long id) {
         return budgetRepository.findById(id);
