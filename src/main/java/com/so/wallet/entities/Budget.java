@@ -3,6 +3,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Data
 public class Budget {
@@ -17,6 +19,7 @@ public class Budget {
     private Utilisateur utilisateur;
 
     @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL)
+    @JsonIgnore 
     private List<Transaction> transactions;
 
 

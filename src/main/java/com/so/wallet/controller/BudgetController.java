@@ -30,7 +30,7 @@ public class BudgetController {
         return budgetService.getAllBudgets();
     }*/
 
-    @GetMapping("/{id}")
+    @GetMapping("/bud/{id}")
     public ResponseEntity<Budget> getBudgetById(@PathVariable Long id) {
         Optional<Budget> budget = budgetService.getBudgetById(id);
         return budget.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
@@ -41,7 +41,7 @@ public class BudgetController {
         return budgetService.saveBudget(budget);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/bud/{id}")
     public ResponseEntity<Void> deleteBudget(@PathVariable Long id) {
         budgetService.deleteBudget(id);
         return ResponseEntity.noContent().build();

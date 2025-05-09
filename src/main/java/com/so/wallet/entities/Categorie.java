@@ -3,6 +3,8 @@ package com.so.wallet.entities;
 import jakarta.persistence.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Categorie {
 
@@ -13,6 +15,7 @@ public class Categorie {
     private String nom;
 
     @OneToMany(mappedBy = "categorie", cascade = CascadeType.ALL)
+    @JsonIgnore 
     private List<Transaction> transactions;
     // Getters et Setters
 
