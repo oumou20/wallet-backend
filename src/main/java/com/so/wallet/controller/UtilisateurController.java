@@ -8,6 +8,7 @@ import jdk.jshell.execution.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
@@ -66,8 +67,7 @@ public class UtilisateurController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
     @GetMapping("/profil")
-    public ResponseEntity<UtilisateurProfilDTO> getProfilUtilisateur() {
-        Utilisateur utilisateur = utilisateurService.getUtilisateurActuel();
+    public ResponseEntity<UtilisateurProfilDTO> getProfilUtilisateur(@AuthenticationPrincipal Utilisateur utilisateur) {
         UtilisateurProfilDTO profilDTO = new UtilisateurProfilDTO(
                 utilisateur.getName(),
                 utilisateur.getPrenom(),
