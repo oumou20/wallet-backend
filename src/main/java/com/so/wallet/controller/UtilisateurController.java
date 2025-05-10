@@ -1,5 +1,6 @@
 package com.so.wallet.controller;
 
+import com.so.wallet.dto.UtilisateurProfilDTO;
 import com.so.wallet.entities.Utilisateur;
 import com.so.wallet.repository.UtilisateurRepository;
 import  com.so.wallet.service.UtilisateurService;
@@ -65,9 +66,15 @@ public class UtilisateurController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
     @GetMapping("/profil")
-    public ResponseEntity<Utilisateur> getProfilUtilisateur() {
+    public ResponseEntity<UtilisateurProfilDTO> getProfilUtilisateur() {
         Utilisateur utilisateur = utilisateurService.getUtilisateurActuel();
-        return ResponseEntity.ok(utilisateur);
+        UtilisateurProfilDTO profilDTO = new UtilisateurProfilDTO(
+                utilisateur.getName(),
+                utilisateur.getPrenom(),
+                utilisateur.getEmail()
+        );
+        return ResponseEntity.ok(profilDTO);
     }
+
 
 }
