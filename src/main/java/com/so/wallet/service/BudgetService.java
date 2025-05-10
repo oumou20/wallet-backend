@@ -38,9 +38,11 @@ public class BudgetService {
         return budgetRepository.findById(id);
     }
 
-    public Budget saveBudget(Budget budget) {
+    public Budget saveBudget(Budget budget, Utilisateur utilisateur) {
+        budget.setUtilisateur(utilisateur); // lie le budget à l'utilisateur connecté
         return budgetRepository.save(budget);
     }
+
 
     public void deleteBudget(Long id) {
         budgetRepository.deleteById(id);

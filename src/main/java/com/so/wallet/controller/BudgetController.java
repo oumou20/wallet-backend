@@ -37,11 +37,12 @@ public class BudgetController {
     }
 
     @PostMapping
-    public Budget createBudget(@RequestBody Budget budget) {
-        return budgetService.saveBudget(budget);
+    public Budget createBudget(@RequestBody Budget budget, @AuthenticationPrincipal Utilisateur utilisateur) {
+        return budgetService.saveBudget(budget, utilisateur);
     }
 
-    @DeleteMapping("/bud/{id}")
+
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBudget(@PathVariable Long id) {
         budgetService.deleteBudget(id);
         return ResponseEntity.noContent().build();

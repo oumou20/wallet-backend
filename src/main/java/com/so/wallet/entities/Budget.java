@@ -16,7 +16,9 @@ public class Budget {
     private Double montant;
 
     @ManyToOne
+    @JoinColumn(name = "utilisateur_id")
     private Utilisateur utilisateur;
+
 
     @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL)
     @JsonIgnore 
