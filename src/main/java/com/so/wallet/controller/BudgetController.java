@@ -37,9 +37,10 @@ public class BudgetController {
     }
 
     @PostMapping
-    public Budget createBudget(@RequestBody Budget budget, @AuthenticationPrincipal Utilisateur utilisateur) {
-        return budgetService.saveBudget(budget, utilisateur);
+    public Budget createBudget(@RequestParam double montant, @AuthenticationPrincipal Utilisateur utilisateur) {
+        return budgetService.saveBudget(montant, utilisateur);
     }
+
 
 
     @DeleteMapping("/{id}")

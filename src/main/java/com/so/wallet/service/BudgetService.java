@@ -9,6 +9,7 @@ import com.so.wallet.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,10 +39,14 @@ public class BudgetService {
         return budgetRepository.findById(id);
     }
 
-    public Budget saveBudget(Budget budget, Utilisateur utilisateur) {
-        budget.setUtilisateur(utilisateur); // lie le budget à l'utilisateur connecté
+    public Budget saveBudget(double montant, Utilisateur utilisateur) {
+        Budget budget = new Budget();
+        budget.setMontant(montant);
+        budget.setUtilisateur(utilisateur);
+        budget.setMois(LocalDate.now().toString());
         return budgetRepository.save(budget);
     }
+
 
 
     public void deleteBudget(Long id) {
