@@ -19,8 +19,9 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/utilisateurs")
 public class UtilisateurController {
-
+    @Autowired
     private final UtilisateurRepository utilisateurRepository;
+    @Autowired
     private final UtilisateurService utilisateurService;
 
 

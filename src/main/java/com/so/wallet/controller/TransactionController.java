@@ -40,7 +40,7 @@ public class TransactionController {
     }
 
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("del/{id}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
         transactionService.deleteTransaction(id);
         return ResponseEntity.noContent().build();
@@ -57,7 +57,7 @@ public class TransactionController {
 
         PdfExporter.exportTransactions(response, lignes);
     }*/
-    @PutMapping("/{id}")
+    @PutMapping("put/{id}")
     public ResponseEntity<Transaction> updateTransaction(@PathVariable Long id, @RequestBody Transaction updatedTransaction) {
         Optional<Transaction> existingTransaction = transactionService.getTransactionById(id);
 
