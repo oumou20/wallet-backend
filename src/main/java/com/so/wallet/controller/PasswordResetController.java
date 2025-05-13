@@ -5,7 +5,9 @@ import com.so.wallet.entities.Utilisateur;
 import com.so.wallet.repository.PasswordResetTokenRepository;
 import com.so.wallet.repository.UtilisateurRepository;
 import com.so.wallet.service.EmailService;
+import io.jsonwebtoken.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,69 +21,77 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/password-reset")
 public class PasswordResetController {
 
-    @Autowired
-    private UtilisateurRepository utilisateurRepository;
+    private final UtilisateurRepository utilisateurRepository;
+    private final PasswordResetTokenRepository tokenRepository;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordResetTokenRepository tokenRepository;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @PostMapping("/forgot-password")
-    @Transactional
-    public ResponseEntity<?> demanderReset(@RequestParam String email) {
-        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByEmail(email);
-        if (utilisateurOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Utilisateur introuvable");
-        }
-
-        Utilisateur utilisateur = utilisateurOpt.get();
-        String token = UUID.randomUUID().toString();
-
-        // Chercher un token existant
-        Optional<PasswordResetToken> existingToken = tokenRepository.findByUtilisateur(utilisateur);
-
-        PasswordResetToken resetToken;
-        if (existingToken.isPresent()) {
-            resetToken = existingToken.get();
-            resetToken.setToken(token); // mise à jour du token
-            resetToken.setExpiration(LocalDateTime.now().plusMinutes(30));
-        } else {
-            resetToken = new PasswordResetToken();
-            resetToken.setUtilisateur(utilisateur);
-            resetToken.setToken(token);
-            resetToken.setExpiration(LocalDateTime.now().plusMinutes(30));
-        }
-
-        tokenRepository.save(resetToken); // création ou mise à jour
-
-        String resetLink = "http://localhost:4200/reset-password?token=" + token;
-        emailService.envoyerMail(utilisateur.getEmail(), "Réinitialisation de mot de passe",
-                "Cliquez sur ce lien pour réinitialiser votre mot de passe : " + resetLink);
-
-        return ResponseEntity.ok("Un lien de réinitialisation a été envoyé à votre email");
+    public PasswordResetController(UtilisateurRepository utilisateurRepository,
+                                   PasswordResetTokenRepository tokenRepository,
+                                   EmailService emailService,
+                                   PasswordEncoder passwordEncoder) {
+        this.utilisateurRepository = utilisateurRepository;
+        this.tokenRepository = tokenRepository;
+        this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String nouveauMotDePasse) {
-        Optional<PasswordResetToken> tokenOpt = tokenRepository.findByToken(token);
-        if (tokenOpt.isEmpty() || tokenOpt.get().getExpiration().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("Token invalide ou expiré");
+    // Étape 1 : Demande de réinitialisation
+    @PostMapping("/request")
+    public ResponseEntity<String> requestReset(@RequestParam String email) {
+        Optional<Utilisateur> optionalUser = utilisateurRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            Utilisateur utilisateur = optionalUser.get();
+
+            String token = UUID.randomUUID().toString();
+            PasswordResetToken resetToken = new PasswordResetToken();
+            resetToken.setToken(token);
+            resetToken.setUtilisateur(utilisateur);
+            resetToken.setExpiration(LocalDateTime.now().plusMinutes(15));
+            tokenRepository.save(resetToken);
+
+            String link = "http://localhost:8080/password-reset/reset?token=" + token;
+            String body = "Bonjour " + utilisateur.getName() + ",\n\n" +
+                    "Cliquez sur ce lien pour réinitialiser votre mot de passe :\n" + link +
+                    "\n\nCe lien expire dans 15 minutes.";
+
+            try {
+                emailService.sendEmail(utilisateur.getEmail(), "Réinitialisation de mot de passe", body);
+            } catch (IOException | java.io.IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Erreur lors de l'envoi de l'e-mail : " + e.getMessage());
+            }
+
+            return ResponseEntity.ok("E-mail de réinitialisation envoyé.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Aucun utilisateur trouvé avec cet e-mail.");
         }
+    }
 
-        Utilisateur utilisateur = tokenOpt.get().getUtilisateur();
-        utilisateur.setPassword(passwordEncoder.encode(nouveauMotDePasse));
-        utilisateurRepository.save(utilisateur);
+    // Étape 2 : Réinitialisation avec le token
+    @PostMapping("/reset")
+    public ResponseEntity<String> resetPassword(@RequestParam String token,
+                                                @RequestParam String nouveauMotDePasse) {
+        Optional<PasswordResetToken> optionalToken = tokenRepository.findByToken(token);
+        if (optionalToken.isPresent()) {
+            PasswordResetToken resetToken = optionalToken.get();
 
-        tokenRepository.delete(tokenOpt.get()); // supprimer le token utilisé
+            if (resetToken.getExpiration().isBefore(LocalDateTime.now())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Le lien a expiré.");
+            }
 
-        return ResponseEntity.ok("Mot de passe modifié avec succès");
+            Utilisateur utilisateur = resetToken.getUtilisateur();
+            utilisateur.setPassword(passwordEncoder.encode(nouveauMotDePasse));
+            utilisateurRepository.save(utilisateur);
+
+            tokenRepository.delete(resetToken); // Invalider le token après usage
+
+            return ResponseEntity.ok("Mot de passe réinitialisé avec succès.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token invalide.");
+        }
     }
 }

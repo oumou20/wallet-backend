@@ -2,6 +2,7 @@ package com.so.wallet.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
 
@@ -12,11 +13,18 @@ public class PasswordResetToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String token;
+
+    @Column(nullable = false)
     private LocalDateTime expiration;
+
 
     @OneToOne
     @JoinColumn(name = "utilisateur_id", unique = true)
+
+    @ManyToOne
+    @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
 
 }
