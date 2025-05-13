@@ -44,12 +44,16 @@ public class UtilisateurController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Utilisateur> updatedUtilisateur(@PathVariable Long id, @RequestBody Utilisateur utilisateurDetails) {
+    public ResponseEntity<Utilisateur> updatedUtilisateur(@PathVariable Long id,
+                                                          @RequestBody Utilisateur utilisateurDetails,
+                                                          @AuthenticationPrincipal Utilisateur utilisateur ) {
         Utilisateur existingUtilisateur = utilisateurService.findById(id);
 
         if (existingUtilisateur != null) {
-            existingUtilisateur.setPassword(utilisateurDetails.getPassword());
+            existingUtilisateur.setName(utilisateurDetails.getName());
             existingUtilisateur.setEmail(utilisateurDetails.getEmail());
+            existingUtilisateur.setPrenom(utilisateurDetails.getPrenom()); 
+
 
             Utilisateur updatedUtilisateur = utilisateurService.saveOrUpdate(existingUtilisateur);
             return new ResponseEntity<>(updatedUtilisateur, HttpStatus.OK);
@@ -70,6 +74,7 @@ public class UtilisateurController {
     @GetMapping("/profil")
     public ResponseEntity<UtilisateurProfilDTO> getProfilUtilisateur(@AuthenticationPrincipal Utilisateur utilisateur) {
         UtilisateurProfilDTO profilDTO = new UtilisateurProfilDTO(
+                utilisateur.getId(),
                 utilisateur.getName(),
                 utilisateur.getPrenom(),
                 utilisateur.getEmail()

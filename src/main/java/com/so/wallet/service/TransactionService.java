@@ -21,6 +21,7 @@ public class TransactionService {
     private TransactionRepository transactionRepository;
     @Autowired
     private NotificationRepository notificationRepository;
+    @Autowired
     private NotificationService notificationService;
 
     @Autowired

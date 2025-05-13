@@ -24,6 +24,12 @@ public class BudgetController {
         // Appeler le service pour récupérer les budgets de l'utilisateur
         return budgetService.getByBudgetsUtilisateur(utilisateur);
     }
+    @GetMapping("/actuel")
+    public ResponseEntity<Budget> getBudgetActuel(@AuthenticationPrincipal Utilisateur utilisateur) {
+      Budget budget = budgetService.getBudgetActuel(utilisateur);
+      if (budget == null) return ResponseEntity.noContent().build();
+      return ResponseEntity.ok(budget);
+    }
 
   /*  @GetMapping
     public List<Budget> getAllBudgets() {
