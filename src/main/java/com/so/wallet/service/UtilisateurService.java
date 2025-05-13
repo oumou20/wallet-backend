@@ -19,11 +19,12 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UtilisateurService {
-@Autowired
-BudgetRepository budgetRepository;
-    RapportRepository rapportRepository;
-
-private  UtilisateurRepository utilisateurRepository;
+  @Autowired
+  BudgetRepository budgetRepository;
+  @Autowired
+  RapportRepository rapportRepository;
+  @Autowired
+  private  UtilisateurRepository utilisateurRepository;
 
 
     public List<Utilisateur> findAll() {

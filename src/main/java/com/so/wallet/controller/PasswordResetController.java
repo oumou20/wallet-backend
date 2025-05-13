@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional; // ajouter
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -23,26 +24,43 @@ public class PasswordResetController {
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
+
     @Autowired
     private PasswordResetTokenRepository tokenRepository;
+
     @Autowired
     private EmailService emailService;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/forgot-password")
+    @Transactional
     public ResponseEntity<?> demanderReset(@RequestParam String email) {
         Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByEmail(email);
-        if (utilisateurOpt.isEmpty()) return ResponseEntity.badRequest().body("Utilisateur introuvable");
+        if (utilisateurOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Utilisateur introuvable");
+        }
 
         Utilisateur utilisateur = utilisateurOpt.get();
         String token = UUID.randomUUID().toString();
 
-        PasswordResetToken resetToken = new PasswordResetToken();
-        resetToken.setToken(token);
-        resetToken.setUtilisateur(utilisateur);
-        resetToken.setExpiration(LocalDateTime.now().plusMinutes(30));
-        tokenRepository.save(resetToken);
+        // Chercher un token existant
+        Optional<PasswordResetToken> existingToken = tokenRepository.findByUtilisateur(utilisateur);
+
+        PasswordResetToken resetToken;
+        if (existingToken.isPresent()) {
+            resetToken = existingToken.get();
+            resetToken.setToken(token); // mise à jour du token
+            resetToken.setExpiration(LocalDateTime.now().plusMinutes(30));
+        } else {
+            resetToken = new PasswordResetToken();
+            resetToken.setUtilisateur(utilisateur);
+            resetToken.setToken(token);
+            resetToken.setExpiration(LocalDateTime.now().plusMinutes(30));
+        }
+
+        tokenRepository.save(resetToken); // création ou mise à jour
 
         String resetLink = "http://localhost:4200/reset-password?token=" + token;
         emailService.envoyerMail(utilisateur.getEmail(), "Réinitialisation de mot de passe",
@@ -62,9 +80,8 @@ public class PasswordResetController {
         utilisateur.setPassword(passwordEncoder.encode(nouveauMotDePasse));
         utilisateurRepository.save(utilisateur);
 
-        tokenRepository.delete(tokenOpt.get());
+        tokenRepository.delete(tokenOpt.get()); // supprimer le token utilisé
 
         return ResponseEntity.ok("Mot de passe modifié avec succès");
     }
 }
-

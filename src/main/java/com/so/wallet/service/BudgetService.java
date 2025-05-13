@@ -43,11 +43,15 @@ public class BudgetService {
         Budget budget = new Budget();
         budget.setMontant(montant);
         budget.setUtilisateur(utilisateur);
-        budget.setMois(LocalDate.now().toString());
+        budget.setMois(LocalDate.now());  // type LocalDate
+
         return budgetRepository.save(budget);
     }
 
-
+    public Budget getBudgetActuel(Utilisateur utilisateur) {
+        List<Budget> budgets = getByBudgetsUtilisateur(utilisateur);
+        return budgets.isEmpty() ? null : budgets.get(budgets.size() - 1); // dernier budget
+    }
 
     public void deleteBudget(Long id) {
         budgetRepository.deleteById(id);

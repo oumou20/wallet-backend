@@ -2,6 +2,7 @@ package com.so.wallet.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -12,7 +13,8 @@ public class Budget {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String mois;
+    private LocalDate mois;
+
     private Double montant;
 
     @ManyToOne
