@@ -8,6 +8,8 @@ import com.so.wallet.service.EmailService;
 import io.jsonwebtoken.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
+
 @RequestMapping("/password-reset")
 public class PasswordResetController {
 
@@ -95,3 +98,4 @@ public class PasswordResetController {
         }
     }
 }
+

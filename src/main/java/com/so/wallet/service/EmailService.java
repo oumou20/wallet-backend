@@ -1,5 +1,6 @@
 package com.so.wallet.service;
 
+
 import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
@@ -64,6 +65,5 @@ public class EmailService {
 
         sendEmail(utilisateur.getEmail(), subject, body);
     }
-
 }
 
