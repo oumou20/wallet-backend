@@ -1,12 +1,10 @@
 package com.so.wallet.service;
 
 import com.so.wallet.entities.Budget;
+import com.so.wallet.entities.PasswordResetToken;
 import com.so.wallet.entities.Rapport;
 import com.so.wallet.entities.Utilisateur;
-import com.so.wallet.repository.TransactionRepository;
-import com.so.wallet.repository.UtilisateurRepository;
-import com.so.wallet.repository.BudgetRepository;
-import com.so.wallet.repository.RapportRepository;
+import com.so.wallet.repository.*;
 
 
 import lombok.RequiredArgsConstructor;
@@ -14,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +25,10 @@ public class UtilisateurService {
   RapportRepository rapportRepository;
   @Autowired
   private  UtilisateurRepository utilisateurRepository;
-
+    @Autowired
+    private final PasswordResetTokenRepository tokenRepository;
+    @Autowired
+    private final EmailService emailService;
 
     public List<Utilisateur> findAll() {
         return utilisateurRepository.findAll();
@@ -56,5 +59,40 @@ public class UtilisateurService {
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
     }
 
+//ajout pour mot de pass oublié
+public void sendResetPasswordToken(String email) {
+    Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Aucun utilisateur trouvé avec cet email"));
 
+    String token = UUID.randomUUID().toString();
+    LocalDateTime expiration = LocalDateTime.now().plusMinutes(15);
+
+    PasswordResetToken resetToken = tokenRepository.findByUtilisateur(utilisateur)
+            .orElse(new PasswordResetToken());
+
+    resetToken.setToken(token);
+    resetToken.setExpiration(expiration);
+    resetToken.setUtilisateur(utilisateur);
+
+    tokenRepository.save(resetToken);
+
+    String resetLink = "http://localhost:4200/reset-password?token=" + token; // Flutter changera ça
+    emailService.sendResetPasswordEmail(email, resetLink);
 }
+
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken resetToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Jeton invalide"));
+
+        if (resetToken.getExpiration().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Jeton expiré");
+        }
+
+        Utilisateur utilisateur = resetToken.getUtilisateur();
+        utilisateur.setPassword(newPassword); // tu peux encoder ici
+        utilisateurRepository.save(utilisateur);
+
+        tokenRepository.delete(resetToken); // sécurité : on supprime le token après usage
+    }
+}
+

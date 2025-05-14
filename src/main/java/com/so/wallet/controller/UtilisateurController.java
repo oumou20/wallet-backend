@@ -1,5 +1,6 @@
 package com.so.wallet.controller;
 
+import com.so.wallet.dto.ResetPasswordRequest;
 import com.so.wallet.dto.UtilisateurProfilDTO;
 import com.so.wallet.entities.Utilisateur;
 import com.so.wallet.repository.UtilisateurRepository;
@@ -82,5 +83,16 @@ public class UtilisateurController {
         return ResponseEntity.ok(profilDTO);
     }
 
+//ajout pour mot de pass oublié
+@PostMapping("/forgot-password")
+public ResponseEntity<String> forgotPassword(@RequestParam String email) {
+    utilisateurService.sendResetPasswordToken(email);
+    return ResponseEntity.ok("Lien de réinitialisation envoyé (console pour test)");
+}
 
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        utilisateurService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok("Mot de passe réinitialisé avec succès");
+    }
 }

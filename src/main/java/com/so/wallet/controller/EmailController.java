@@ -1,4 +1,5 @@
 package com.so.wallet.controller;
+/*
 import com.so.wallet.entities.Utilisateur;
 import com.so.wallet.repository.UtilisateurRepository;
 import com.so.wallet.service.EmailService;
@@ -54,3 +55,4 @@ public class EmailController {
 
 
 }
+*/

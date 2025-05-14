@@ -1,5 +1,5 @@
 package com.so.wallet.controller;
-
+/*
 import com.so.wallet.entities.PasswordResetToken;
 import com.so.wallet.entities.Utilisateur;
 import com.so.wallet.repository.PasswordResetTokenRepository;
@@ -98,4 +98,5 @@ public class PasswordResetController {
         }
     }
 }
+*/
 
